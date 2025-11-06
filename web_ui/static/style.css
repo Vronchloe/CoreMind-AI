@@ -1,0 +1,19 @@
+body {
+    background: #f5f7fa;
+}
+
+.feature-section {
+    box-shadow: 0 2px 6px #aaa2;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.response-box {
+    font-family: 'Consolas', monospace;
+    font-size: 1rem;
+}
+
+h1, h3, h4 {
+    color: #2e387c;
+}

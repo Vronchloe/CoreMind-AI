@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CoreMind AI Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .feature-section { margin-bottom: 2rem; }
+        .response-box { min-height: 3rem; margin-top: 1rem; background: #eef; padding: 1rem; border-radius: 8px; }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body class="container">
+    <h1 class="mt-3 mb-4">CoreMind AI<span class="badge bg-primary ms-2">Offline Demo</span></h1>
+    
+    <div>
+        <h3>System Information</h3>
+        <ul>
+            <li><b>Operating System:</b> {{ system.os }}</li>
+            <li><b>CPUs:</b> {{ system.cpu_count }}</li>
+            <li><b>Total RAM:</b> {{ system.total_ram_gb }} GB</li>
+        </ul>
+        <div id="resource-monitor"></div>
+    </div>
+    
+    <div>
+        <h3>Privacy Dashboard <button id="refresh-privacy" class="btn btn-sm btn-secondary">Refresh</button></h3>
+        <div id="privacy-box"></div>
+    </div>
+    
+    <hr/>
+    <div class="row">
+        <div class="col-lg-4 feature-section">
+            <h4>Chat Assistant</h4>
+            <form id="chat-form">
+                <input class="form-control my-2" name="user_input" placeholder="Say something..."/>
+                <button class="btn btn-primary">Ask</button>
+            </form>
+            <div id="chat-response" class="response-box"></div>
+        </div>
+        
+        <div class="col-lg-4 feature-section">
+            <h4>Code Assistant</h4>
+            <form id="code-form">
+                <textarea class="form-control my-2" name="code" rows="4" placeholder="Paste code here..."></textarea>
+                <input class="form-control mb-2" name="question" placeholder="(Optional) What do you want to know?"/>
+                <button class="btn btn-success">Analyze</button>
+            </form>
+            <div id="code-response" class="response-box"></div>
+        </div>
+        
+        <div class="col-lg-4 feature-section">
+            <h4>File Summarizer</h4>
+            <form id="summary-form">
+                <textarea class="form-control my-2" name="text" rows="4" placeholder="Paste text/document..."></textarea>
+                <button class="btn btn-warning">Summarize</button>
+            </form>
+            <div id="summary-response" class="response-box"></div>
+        </div>
+    </div>
+    
+    <script>
+        function refreshResources() {
+            $.get('/resources', function(data) {
+                let html = `<b>CPU Usage:</b> ${data.usage.cpu_usage}%<br>
+                            <b>RAM Used:</b> ${data.usage.ram_used_gb} GB<br>
+                            <b>RAM Available:</b> ${data.usage.ram_available_gb} GB<br>
+                            <b>Model Recommendation:</b> <span class="badge bg-success">${data.recommended}</span><br>
+                            <b>System Status:</b> <span class="badge bg-info">${data.status}</span>`;
+                $('#resource-monitor').html(html);
+            });
+        }
+        refreshResources();
+        setInterval(refreshResources, 10000);
+
+        $('#refresh-privacy').click(function() {
+            $.get('/privacy', function(data) {
+                let html = `<b>Total Local Operations:</b> ${data.total_operations}<br>
+                            <b>Network Calls Blocked:</b> ${data.network_calls_blocked}<br>
+                            <b>Data Location:</b> ${data.data_location}`;
+                $('#privacy-box').html(html);
+            });
+        }).trigger('click');
+
+        $('#chat-form').submit(function(e) {
+            e.preventDefault();
+            $.post('/chat', $(this).serialize(), function(data){
+                $('#chat-response').text(data.response);
+            });
+        });
+        $('#code-form').submit(function(e) {
+            e.preventDefault();
+            $.post('/code', $(this).serialize(), function(data){
+                $('#code-response').text(data.response);
+            });
+        });
+        $('#summary-form').submit(function(e) {
+            e.preventDefault();
+            $.post('/summarize', $(this).serialize(), function(data){
+                $('#summary-response').text(data.response);
+            });
+        });
+    </script>
+</body>
+</html>
